@@ -1,72 +1,46 @@
-const form = document.getElementById("numberForm");
-const numberInput = document.getElementById("numberInput");
-const output = document.getElementById("output");
+function showMyCaptcha() {
+    const number = parseInt(document.getElementById("numberInput").value);
+    
 
-let stopExecution = false; 
-
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const N = parseInt(numberInput.value, 10);
-  if (isNaN(N) || N < 1 || N > 1000) {
-    alert("Please enter a number between 1 and 1000.");
-    return;
-  }
-
-  // Clear the output
-  output.innerHTML = "";
-
-  // Perform the sequence
-  for (let i = 1; i <= N; i++) {
-    if (stopExecution) {
-      await waitForCaptcha(); // Wait until captcha is resolved
+    if (isNaN(number) || number < 1 || number > 1000) {
+        alert("Veuillez entrer un nombre entre 101 et 1000.");
+        return;
     }
 
-    try {
-      await fetchWhoAmI(i);
-    } catch (error) {
-      if (error.message === "Captcha required") {
-        stopExecution = true;
-        triggerCaptcha();
-      } else {
-        console.error(error);
-      }
-    }
+ 
+    document.getElementById("captchaForm").style.display = "none";
+    document.getElementById("output").style.display = "block";
+    
+    var container = document.querySelector("#my-captcha-container");
 
-    await sleep(1000); // Wait 1 second
-  }
-});
-
-function fetchWhoAmI(index) {
-  return new Promise((resolve, reject) => {
-    fetch("https://api.prod.jcloudify.com/whoami")
-      .then((response) => {
-        if (response.status === 403) {
-          reject(new Error("Captcha required"));
-        } else {
-          output.innerHTML += `<div>${index}. Forbidden</div>`;
-          resolve();
-        }
-      })
-      .catch((error) => reject(error));
-  });
-}
-
-function triggerCaptcha() {
-  // Captcha appears automatically due to AWS WAF protection
-  // No specific code needed here as the SDK integration will handle it
-}
-
-function waitForCaptcha() {
-  return new Promise((resolve) => {
-    // Captcha SDK event listener to detect resolution
-    document.addEventListener("captchaResolved", () => {
-      stopExecution = false;
-      resolve();
+    AwsWafCaptcha.renderCaptcha(container, {
+        apiKey: window.WAF_API_KEY,
+        onSuccess: function(wafToken) {
+            submitForm(number);
+        },
+        onError: captchaExampleErrorFunction,
     });
-  });
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function captchaExampleErrorFunction(error) {
+    console.error("Erreur de Captcha:", error);
+}
+
+function submitForm(number) {
+    let count = 1;
+    const interval = setInterval(function() {
+        fetch('https://api.prod.jcloudify.com/whoami')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("sequenceOutput").innerHTML += `${count}. Forbidden<br>`;
+            })
+            .catch(error => {
+                console.error("Erreur lors de l'appel API:", error);
+            });
+        
+        count++;
+        if (count > number) {
+            clearInterval(interval);
+        }
+    }, 1000); 
 }
