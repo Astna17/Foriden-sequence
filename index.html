@@ -3,26 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Captcha & Sequence</title>
-    <script type="text/javascript" src="https://b82b1763d1c3.eu-west-3.captcha-sdk.awswaf.com/b82b1763d1c3/jsapi.js" defer></script>    
+    <title>Application Web avec Séquence et Captcha</title>
+    <script type="text/javascript" src="https://b82b1763d1c3.eu-west-3.captcha-sdk.awswaf.com/b82b1763d1c3/jsapi.js" defer></script>
     <script type="text/javascript" src="app.js" defer></script> 
 </head>
 <body>
-
+    <!-- Formulaire pour saisir un nombre -->
     <div id="captchaForm">
-        <h2>Enter number between 1 and 1000</h2>
+        <h2>Entrez un nombre entre 1 et 1000</h2>
         <input type="number" id="numberInput" min="1" max="1000" required>
-
-        <button type="button" onclick="showMyCaptcha()">Submit</button>
+        
+        <!-- Bouton qui lance l'affichage de la séquence et du captcha -->
+        <button type="button" onclick="generateSequence()">Submit</button>
     </div>
 
+    <!-- Affichage de la séquence "Forbidden" après soumission -->
     <div id="output" style="display:none;">
         <h2>Sequence output :</h2>
         <div id="sequenceOutput"></div>
     </div>
 
     <div id="my-captcha-container">
-
+        <!-- Le widget captcha sera rendu ici -->
     </div>
 </body>
 </html>
